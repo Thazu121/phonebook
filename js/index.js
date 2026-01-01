@@ -44,47 +44,69 @@ function isValidPhone(phone) {
     const phoneRegex = /^\+?\d{10,15}$/
     return phoneRegex.test(phone)
 }
+form.addEventListener("submit", async (e) => {
+    e.preventDefault()
 
-
-form.addEventListener("submit", async (event) => {
-    event.preventDefault()
+    btn.disabled = true
+    btn.textContent = "Saving..."
 
     const name = nameInput.value.trim()
     const phone = phoneInput.value.trim()
     const id = contactIdInput.value
 
-    if (name === "" || phone === "") {
+    if (!name || !phone) {
         alert("Fields cannot be blank")
+        btn.disabled = false
+        btn.textContent = id ? "Update Contact" : "Save Contact"
         return
     }
 
     if (!isValidPhone(phone)) {
-        alert("Enter a valid phone number!")
+        alert("Enter a valid phone number")
+        btn.disabled = false
+        btn.textContent = id ? "Update Contact" : "Save Contact"
         return
     }
 
     try {
-            if (contacts.some(c => c.phone === phone)) {
-                alert("Contact with this phone number already exists!")
+        if (id) {
+            if (contacts.some(c => c.phone === phone && c.id != id)) {
+                alert("Another contact with this phone number already exists")
                 return
             }
 
-            const newContact = { name, phone }
+            await fetch(`http://localhost:3000/contacts/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, phone })
+            })
+
+            contactIdInput.value = ""
+
+        } else {
+            if (contacts.some(c => c.phone === phone)) {
+                alert("Contact with this phone number already exists")
+                return
+            }
 
             await fetch("http://localhost:3000/contacts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newContact)
+                body: JSON.stringify({ name, phone })
             })
-        
+        }
 
         form.reset()
-        fetchContacts()  // reload contacts after add/update
+        await fetchContacts()
+
     } catch (error) {
         console.error("Error saving contact:", error)
+
+    } finally {
+        btn.disabled = false
+        btn.textContent = contactIdInput.value ? "Update Contact" : "Save Contact"
     }
 })
-
 
 
 
@@ -116,3 +138,12 @@ function editContact(id) {
 
     btn.textContent = "Update Contact"
 }
+
+searchInp.addEventListener("input", () => {
+    const query = searchInp.value.toLowerCase()
+    const filtered = contacts.filter(c =>
+        c.name.toLowerCase().includes(query) ||
+        c.phone.includes(query)
+    )
+    displayContacts(filtered)
+})
