@@ -6,51 +6,67 @@ const nameInput = document.getElementById("name")
 const phoneInput = document.getElementById("phoneNumber")
 const contactIdInput = document.getElementById("contactId")
 
+let contact = JSON.parse(localStorage.getItem("my")) || []
 
-document.addEventListener("DOMContentLoaded", fetchContacts)
-let contacts = []
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (contact.length > 0) {
+    displayContacts(contact)
+  } else {
+    fetchContacts()
+  }
+})
+
+
+
 async function fetchContacts() {
-    try {
-        const response = await fetch("http://localhost:3000/contacts")
-        contacts = await response.json()
-        displayContacts(contacts)
-    } catch (error) {
-console.error("Error fetching contacts:", error)
-    }
+  try {
+    const response = await fetch("./contact.json")
+    const data = await response.json()
+
+contact = data.contacts
+    localStorage.setItem("my", JSON.stringify(contact)) 
+    displayContacts(contact);
+
+  } catch (error) {
+    console.error("Error fetching contacts:", error)
+  }
 }
 
-function displayContacts(contacts) {
-    contactList.innerHTML = ""
-    contacts.forEach(contact => {
-        const li = document.createElement("li")
-        const strong = document.createElement("strong")
-strong.textContent = contact.name
-li.append(strong, ` - ${contact.phone}`)
 
-        const editBtn = document.createElement("button")
-        editBtn.textContent = "Edit"
-        editBtn.className = "edit-btn"
+function displayContacts(list) {
+  contactList.innerHTML = ""
 
-        editBtn.addEventListener("click", () => editContact(contact.id))
-        const deleteBtn = document.createElement("button")
-        deleteBtn.textContent = "Delete"
-        deleteBtn.addEventListener("click", () => deleteContact(contact.id))
-deleteBtn.className = "delete-btn"
+  list.forEach(c => {
+    const li = document.createElement("li")
+    const strong = document.createElement("strong")
 
-        li.appendChild(editBtn)
-        li.appendChild(deleteBtn)
-        contactList.appendChild(li)
-    })
+    strong.textContent = c.name
+    li.append(strong, ` - ${c.phone}`)
+
+    const editBtn = document.createElement("button")
+    editBtn.textContent = "Edit"
+    editBtn.className = "edit-btn"
+    editBtn.addEventListener("click", () => editContact(c.id))
+
+    const deleteBtn = document.createElement("button")
+    deleteBtn.textContent = "Delete"
+    deleteBtn.className = "delete-btn"
+    deleteBtn.addEventListener("click", () => deleteContact(c.id))
+
+    li.appendChild(editBtn)
+    li.appendChild(deleteBtn)
+    contactList.appendChild(li)
+  })
 }
-
 
 
 function isValidPhone(phone) {
-    const phoneRegex = /^\+?\d{10,15}$/
-    return phoneRegex.test(phone)
+  return /^\+?\d{10,15}$/.test(phone)
 }
 
-form.addEventListener("submit", async (e) => {
+
+form.addEventListener("submit", (e) => {
   e.preventDefault()
 
   btn.disabled = true
@@ -59,123 +75,104 @@ form.addEventListener("submit", async (e) => {
   const name = nameInput.value.trim()
   const phone = phoneInput.value.trim()
   const id = contactIdInput.value
-  const isEdit = Boolean(id)   
+  const isEdit = id
 
   if (!name || !phone) {
-    showToast("Fields cannot be blank","error")
+    showToast("Fields cannot be blank", "error")
     resetButton(isEdit)
     return
   }
 
   if (!isValidPhone(phone)) {
-showToast("Contact with this phone number already exists", "error")
+    showToast("Invalid phone number", "error")
     resetButton(isEdit)
     return
   }
 
-  try {
-    if (isEdit) {
-      if (contacts.some(c => c.phone === phone && c.id !== id)) {
-        showToast("Another contact with this phone number already exists","error")
-        resetButton(isEdit)
-
-        return
-      }
-
-      await fetch(`http://localhost:3000/contacts/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone })
-      })
-
-      contactIdInput.value = ""
-    } else {
-      if (contacts.some(c => c.phone === phone)) {
-        showToast("Contact with this phone number already exists","error")
-          resetButton(isEdit)
-
-        return
-      }
-
-      await fetch("http://localhost:3000/contacts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone })
-      })
+  if (isEdit) {
+    if (contact.some(c => c.phone === phone && c.id !== id)) {
+      showToast("Another contact with this phone number already exists", "error")
+      resetButton(isEdit)
+      return
     }
 
-    form.reset()
-    fetchContacts()
-    showToast(isEdit ? "Contact updated" : "Contact saved", "success")
+    const c = contact.find(c => c.id === id)
+    c.name = name
+    c.phone = phone
+    showToast("Contact updated", "success")
 
+  } else {
+    if (contact.some(c => c.phone === phone)) {
+      showToast("Contact with this phone number already exists", "error")
+      resetButton(isEdit)
+      return
+    }
 
-  } catch (error) {
-    console.error("Error saving contact:", error)
-  } finally {
-    resetButton(isEdit)
+    contact.push({
+      id: Date.now().toString(),
+      name,
+      phone
+    })
+
+    showToast("Contact saved", "success")
   }
+
+  localStorage.setItem("my", JSON.stringify(contact))
+
+  form.reset()
+  contactIdInput.value = ""
+  displayContacts(contact)
+  resetButton(false)
 })
 
 
+function deleteContact(id) {
+  if (!confirm("Are you sure you want to delete this contact?")) return
 
+  contact = contact.filter(c => c.id !== id)
 
+  localStorage.setItem("my", JSON.stringify(contact))
 
-async function deleteContact(id) {
-     if (!confirm("Are you sure you want to delete this contact?")) return
-    try {
-        await fetch(`http://localhost:3000/contacts/${id}`, {
-            method: "DELETE"
-        })
-
-        contacts = contacts.filter(contact => contact.id !== id)
-
-        displayContacts(contacts)
-        showToast("Contact deleted", "success")
-
-    } catch (error) {
-        console.error("Error deleting contact:", error)
-    }
+  displayContacts(contact)
+  showToast("Contact deleted", "success")
 }
-
 
 
 function editContact(id) {
-    const contact = contacts.find(c => c.id === id)
-    if (!contact) return
+  const c = contact.find(c => c.id === id)
+  if (!c) return
 
-    nameInput.value = contact.name
-    phoneInput.value = contact.phone
-    contactIdInput.value = contact.id
-
-    btn.textContent = "Update Contact"
+  nameInput.value = c.name
+  phoneInput.value = c.phone
+  contactIdInput.value = c.id
+  btn.textContent = "Update Contact"
 }
+
+
+searchInp.addEventListener("input", () => {
+  const query = searchInp.value.trim().toLowerCase()
+
+  const filtered = contact.filter(c =>
+    c.name.toLowerCase().includes(query) ||
+    c.phone.includes(query)
+  )
+
+  displayContacts(filtered)
+})
+
 
 function resetButton(isEdit) {
   btn.disabled = false
   btn.textContent = isEdit ? "Update Contact" : "Save Contact"
 }
 
-function showToast(message, type = "info",duration) {
+function showToast(message, type = "info") {
   const container = document.getElementById("toast-container")
   const toast = document.createElement("div")
 
   toast.className = `toast ${type}`
   toast.textContent = message
-
   container.appendChild(toast)
 
-  setTimeout(() => {
-    toast.remove()
-  }, 3000)
+  setTimeout(() => toast.remove(), 3000)
 }
-
-
-
-searchInp.addEventListener("input", () => {
-const query = searchInp.value.trim().toLowerCase()
-    const filtered = contacts.filter(c =>
-        c.name.toLowerCase().includes(query) ||
-        c.phone.includes(query)
-    )
-    displayContacts(filtered)
-})
