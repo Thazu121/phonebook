@@ -1,116 +1,34 @@
-# 📞 Phonebook Application (Local API)
+# Contact Manager App
 
-This is a simple Phonebook Application built using HTML, CSS, JavaScript, and a Local API created with json-server.  
-It supports CRUD operations and avoids duplicate contacts.
-
----
-
-## 🚀 Features
-
-- Add new contacts  
-- View all contacts  
-- Edit existing contacts  
-- Delete contacts  
-- Prevent duplicate phone numbers  
-- Uses Local API (json-server)  
-- Uses Fetch API with async/await  
+A simple web-based **Contact Manager** built with HTML, CSS, and JavaScript.  
+Allows users to **add, edit, delete, and search contacts**, with data saved in the browser's **localStorage**.
 
 ---
 
-## 🛠 Technologies Used
+## Features
 
-- HTML  
-- CSS  
-- JavaScript  
-- Node.js  
-- json-server  
-
----
-
-## 📁 Project Structure
-
-phonebook/
-├── index.html  
-├── style.css  
-├── script.js  
-├── db.json  
-└── README.md  
-
----
-
-## ⚙️ How to Run the Project
-
-### 1️⃣ Install Node.js
-Download and install from:
-https://nodejs.org
-
----
-
-### 2️⃣ Install json-server (One Time)
-
-npm install -g json-server
-
-Check installation:
-json-server --version
-
----
-
-### 3️⃣ Create Database File (db.json)
-
-{
-  "contacts": []
-}
-
----
-
-### 4️⃣ Start Local API Server
-
-Open terminal in project folder and run:
-
-json-server --watch db.json
-
----
-
-### 5️⃣ Open API in Browser
-
-http://localhost:3000/contacts
-
----
-
-### 6️⃣ Run the Application
-
-Open index.html in your browser.
-
----
-
-## 🔁 CRUD Operations
-
-Create  → POST    → /contacts  
-Update  → PUT     → /contacts/id  
-Delete  → DELETE  → /contacts/id  
-
----
-
-## 🚫 Avoiding Duplication
-
-- Existing contacts are fetched before saving
-- Phone number is checked
-- Duplicate contacts are not allowed
+- Add new contacts with **Name** and **Phone Number**
+- Edit existing contacts
+- Delete contacts with confirmation
+- Search contacts by **Name** or **Phone Number**
+- Validates phone numbers (10–15 digits, optional `+`)
+- Stores contacts in **localStorage** for persistence
+- Fetches initial contacts from `contact.json` if localStorage is empty
+- Toast notifications for actions (success, error, info)
 
 ---
 
 
-## 🧠 Why Local API?
+## Getting Started
 
-- No internet required  
-- Easy testing  
-- No backend server needed  
+### Prerequisites
 
----
+- Modern web browser (Chrome, Firefox, Edge, Safari)
+- Optional: Live Server extension for easier development
 
-## ✍️ Conclusion
+### Installation
 
-This project demonstrates how to use a Local API with Fetch API to build a CRUD-based phonebook application.
+1. Clone the repository:
 
----
-  
+```bash
+git clone https://github.com/your-username/contact-manager.git
