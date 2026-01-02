@@ -31,4 +31,21 @@ Allows users to **add, edit, delete, and search contacts**, with data saved in t
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/contact-manager.git
+
+
+## project structure
+
+phonebookr/
+│
+├─ index.html          # Main HTML page
+├── style/
+│ └── index.css         # Styling
+├── js/
+│ └── index.js           # JavaScript logic
+├─ contact.json        # Initial contact data
+└─ README.md           # Project documentation
+
+│
+
+
+
