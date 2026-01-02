@@ -31,7 +31,7 @@ Allows users to **add, edit, delete, and search contacts**, with data saved in t
 1. Clone the repository:
 
 ```bash
-
+https://github.com/Thazu121/phonebook.git
 
 ## project structure
 
@@ -45,7 +45,10 @@ phonebookr/
 ├─ contact.json        # Initial contact data
 └─ README.md           # Project documentation
 
-│
+
+## screenshot
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/19397195-b0ee-4bc0-988a-80d9da503f92" />
 
 
 
