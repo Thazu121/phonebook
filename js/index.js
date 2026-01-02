@@ -24,8 +24,8 @@ async function fetchContacts() {
     const response = await fetch("./contact.json")
     const data = await response.json()
 
-contact = data.contacts
-    localStorage.setItem("my", JSON.stringify(contact)) 
+    contact = data.contacts
+    localStorage.setItem("my", JSON.stringify(contact))
     displayContacts(contact);
 
   } catch (error) {
@@ -154,11 +154,12 @@ searchInp.addEventListener("input", () => {
 
   const filtered = contact.filter(c =>
     c.name.toLowerCase().includes(query) ||
-    c.phone.includes(query)
+    c.phone.toLowerCase().includes(query)
   )
 
   displayContacts(filtered)
 })
+
 
 
 function resetButton(isEdit) {
